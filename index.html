@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Editors</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/theme-monokai.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/mode-javascript.js" type="text/javascript" charset="utf-8"></script>
+    <!-- Load Blockly core -->
+<script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
+<!-- Load the default blocks -->
+<script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
+<!-- Load a generator -->
+<script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
+<!-- Load a message file -->
+<script src="https://unpkg.com/blockly/msg/en.js"></script>
+    <style type="text/css" media="screen">
+        #editor, #blocklyDiv { 
+            position: relative;
+            height: 500px;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Code Editors</h1>
+        <h2>Monaco Editor</h2>
+        <button onclick="console.log(editor)">Set Value</button>
+        <div id="monaco-editor" style="height:500px"></div>
+        <h2>ACE Editor</h2>
+        <div id="editor">function foo(items) {
+            var x = "All this is syntax highlighted";
+            return x;
+        }</div>
+        <h2>Blockly Editor</h2>
+        <div id="blocklyDiv" style="height: 480px; width: 600px;"></div>
+        <xml id="toolbox" style="display: none">
+            <block type="controls_if"></block>
+            <block type="logic_compare"></block>
+            <block type="math_number"></block>
+            <block type="math_arithmetic"></block>
+            <block type="text"></block>
+            <block type="text_print"></block>
+        </xml>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs/loader.js"></script>
+    <script>
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            var editor = monaco.editor.create(document.getElementById('monaco-editor'), {
+                value: [
+                    'function x() {',
+                    '\tconsole.log("Hello world!");',
+                    '}'
+                ].join('\n'),
+                language: 'javascript'
+            });
+            if (localStorage.savedtext == undefined){
+                localStorage.savedtext = editor.getValue();
+            }
+            else{
+                editor.setValue(localStorage.savedtext);
+            }
+            editor.getModel().onDidChangeContent(function() {
+                eval(editor.getValue());
+                localStorage.savedtext = editor.getValue();
+            });
+        });
+
+        var aceEditor = ace.edit("editor");
+        aceEditor.setTheme("ace/theme/monokai");
+        aceEditor.session.setMode("ace/mode/javascript");
+
+        //var workspace = Blockly.inject('blocklyDiv');
+        var workspace = Blockly.inject('blocklyDiv', {toolbox: document.getElementById('toolbox')});
+        var xmlText = '<xml xmlns="http://www.w3.org/1999/xhtml"><block type="text_print" id="b1" x="85" y="5"><value name="TEXT"><shadow type="text" id="b2"><field name="TEXT">Hello, World!</field></shadow></value></block></xml>';
+var xmlDom = Blockly.Xml.textToDom(xmlText);
+Blockly.Xml.domToWorkspace(xmlDom, workspace);
+    </script>
+    
+</body>
+</html>
